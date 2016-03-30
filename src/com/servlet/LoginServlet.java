@@ -1,33 +1,40 @@
 package com.servlet;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 
-// Extend HttpServlet class
-public class LoginServlet extends HttpServlet {
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
 
+import com.java.BookingBean;
 
-    public void doPost(HttpServletRequest request,
-                       HttpServletResponse response)
-            throws ServletException, IOException {
-        // Set response content type
-        response.setContentType("text/html");
-        RequestDispatcher dispatcher= null;
-        if (request.getParameter("uname").equalsIgnoreCase("Yashica") && request.getParameter("pwd").equalsIgnoreCase("Yashica")) {
-             dispatcher = request.getRequestDispatcher("Booking.jsp");
-            request.setAttribute("userName", request.getParameter("uname"));
-            request.setAttribute("userContact", "1234556");
-            dispatcher.forward(request, response);
+@Controller
+public class LoginServlet {
 
-        } else {
-             dispatcher = request.getRequestDispatcher("index.jsp");
-            request.setAttribute("error", "Invalid Login");
-            dispatcher.forward(request, response);
-
-        }
-    }
+	@RequestMapping(value="/login" , method = RequestMethod.POST)
+	public ModelAndView goToHelloPage(@RequestBody BookingBean bookingBean) {  
+		ModelAndView view = new ModelAndView();  
+		view.setViewName("login"); //name of the jsp-file in the "page" folder  
+		if (bookingBean.getUserName().equalsIgnoreCase("Yashica") && bookingBean.getPassword().equalsIgnoreCase("Yashica")) {
+			bookingBean.setContactNumber("1234556");
+		} else {
+			bookingBean.setError("Invalid Login");
+		}
+		String str = "MVC Spring is here!";  
+		view.addObject("message", str); //adding of str object as "message" parameter  
+		view.addObject("bookingBean", bookingBean);
+		return view;  
+	}  
+	
+	@RequestMapping("/index")
+	public ModelAndView welcome(Map<String, Object> model) {
+		ModelAndView view = new ModelAndView(); 
+		model.put("time", new Date());
+		model.put("message", "here");
+		view.setViewName("index");
+		return view;
+	}
 }

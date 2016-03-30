@@ -1,45 +1,43 @@
 package com.servlet;
 
-import com.java.*;
+import java.io.IOException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
-public class BookingServlet extends HttpServlet {
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.java.Booking;
+import com.java.BookingBean;
+import com.java.BookingDetails;
+import com.java.Journey;
+import com.java.User;
+import com.java.Vehicle;
 
-    public void doPost(HttpServletRequest request,
-                      HttpServletResponse response)
-            throws ServletException, IOException
-    {
-        response.setContentType("text/html");
-        User user = new User(request.getParameter("userName"),request.getParameter("contactNumber"));
-        Vehicle vehicle = new Vehicle();
-        vehicle.getVehicleType(request.getParameter("cabType"));
-        Journey journey= new Journey(request.getParameter("pickUp"),request.getParameter("drop"),vehicle);
+@Controller
+public class BookingServlet {
 
+	@RequestMapping(value = "/bookingDetails", method = RequestMethod.POST)
+	public @ResponseBody BookingBean bookingDetails(@RequestBody BookingBean bookingBean)
+	{
+		User user = new User(bookingBean.getUserName(),bookingBean.getContactNumber());
+		Vehicle vehicle = new Vehicle();
+		vehicle.getVehicleType(bookingBean.getCabType());
+		Journey journey= new Journey(bookingBean.getCabType(),bookingBean.getDrop(),vehicle);
 
-        Booking booking = new Booking();
-        BookingDetails bookingDetails= booking.bookARide(user, journey);
+		Booking booking = new Booking();
+		BookingDetails bookingDetails= booking.bookARide(user, journey);
+		bookingBean.setContactNumber( "122344");
+		bookingBean.setDriverName(bookingDetails.getDriverDetails().getUserNam()); 
+		bookingBean.setDriverContactNumber(bookingDetails.getDriverDetails().getContactNumber());
+		bookingBean.setVehicleRegNumber("1223");
+		bookingBean.setFare(bookingDetails.getFareAmt() ); 
 
-        RequestDispatcher dispatcher = request.getRequestDispatcher("BookingConfirmation.jsp");
+		return bookingBean;
 
-        request.setAttribute("userName", request.getParameter("userName")); // set your String value in the attribute
-        request.setAttribute("contactNumber", "122344"); // set your String value in the attribute
-        request.setAttribute("cabType", request.getParameter("cabType")); // set your String value in the attribute
-        request.setAttribute("pickUp", request.getParameter("pickUp")); // set your String value in the attribute
-        request.setAttribute("drop", request.getParameter("drop")); // set your String value in the attribute
-        request.setAttribute("driverName", bookingDetails.getDriverDetails().getUserNam()); // set your String value in the attribute
-        request.setAttribute("driverContactNumber", bookingDetails.getDriverDetails().getContactNumber());
-        request.setAttribute("vehicleRegNumber", "1223");
-        request.setAttribute("fare",bookingDetails.getFareAmt() ); // set your String value in the attribute
-
-        dispatcher.forward(request, response);
-
-
-    }
+	}
 }
